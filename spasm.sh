@@ -1,14 +1,22 @@
 #/bin/sh -ex
 
-DATA="$HOME/.local/share/spasm/" #TODO look into a way of improving this
+DATA="$HOME/.local/share/spasm/" #TODO look into a way of improving this to fit more systems. XDG_DATA_HOME maybe?
+
+OPT_ADD=
+OPT_GET=
 
 cat=""
 name=""
 pass=""
 
 #TODO include all program options
+#TODO improve formatting and readability
 usage(){ 
 	echo "usage: spasm [-h] [-G length | -p password] [-a category/service] [-g category/service]"
+}
+
+explode(){
+	usage && exit 1
 }
 
 gen_pass() {
@@ -16,47 +24,59 @@ gen_pass() {
 	< /dev/urandom tr -dc A-Za-z0-9 | head -c$1; echo # Temporary. 
 }
 
-# test if category exists, create it if it does not
+# test if category exists and creates it if it does not. Checks if password exists and returns true if it does #TODO add password checking
 schrodinger(){
-	echo "schrodinger: $DATA$cat"
+	echo "entering schrodinger with: $DATA$cat"
 	mkdir -p "$DATA$cat/"
+	return 0 #TODO change to reflect whether or not password exists
 }
 
-# TODO impl. creating an encrypted file with the password innit
-make_pass(){
-	echo "creating password: $pass"
+#TODO impl. creating an encrypted file with the password innit
+add_pass(){	
+	[[ -z "$pass" ]] && echo "invalid argument -- -a requires password" && explode
+	schrodinger && echo "name \"$name\" already exists" && explode || echo "adding password: $pass to $cat/$name"
+}
+
+#TODO implement getting and decrypting password from file
+get_pass(){
+	schrodinger && echo "getting password from: $DATA$cat/$name"
 }
 
 # parses if the path was typed correctly: "category/website"
 parse_path(){
-	echo "parse_path"
-	# TODO check if theres a better/faster way to do this check.
+	echo "entering parse_path with arg: $1"
+	#TODO check if theres a better/faster way to do this check.
 	cat=$(echo $1 | cut -d"/" -f1)
 	name=$(echo $1 | cut -d"/" -f2)
 
 	if [[ ! "$1" = "$cat/$name" ]]; then
-		echo "invalid argument -- target should be passed like: [category]/[service]"
-		usage
-		exit 1
+		echo "invalid argument -- path should be passed like: [category]/[service]"
+		explode
 	fi
 }
 
-
 optstring="hG:p:a:g:"
-#TODO find a way to ensure checking order
 while getopts $optstring FLAG; #TODO add handling for no options passed
 do	
 	case $FLAG in	
 	h) usage; exit 0 ;; # prints help
-	G) [[ -n "$pass" ]] && usage || pass=$(gen_pass $OPTARG) ;; #generates password
-	p) [[ -n "$pass" ]] && usage || pass=${OPTARG} ;; #takes password from user
+	G) [[ -n "$pass" ]] && explode || pass=$(gen_pass $OPTARG) ;; #generates password #TODO add proper error messages
+	p) [[ -n "$pass" ]] && explode || pass=${OPTARG} ;; #takes password from user #TODO add proper error messages
 
-	# supposed to add a new encrypted password file 
-	# TODO needs either G or p to work, so find a way to ensure they are being run first, and at all
-	a) parse_path $OPTARG && schrodinger && [[ ! -z $pass ]] && make_pass ;;
-	g) echo "getting password from $OPTARG" ;;
+	a) parse_path $OPTARG && OPT_ADD=true ;; #sets option for adding new password to true
+	g) parse_path $OPTARG && OPT_GET=true ;; #sets option for getting password to true
 	# Error handling
 	\?) usage; exit 1 ;;
 
 	esac
 done
+
+[ $OPT_ADD ] && add_pass
+
+if [ $OPT_GET ]; then
+	get_pass
+fi
+
+#TODO remove cleanup stuff
+
+rmdir $DATA$cat

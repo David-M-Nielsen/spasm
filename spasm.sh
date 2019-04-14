@@ -1,5 +1,5 @@
 #/bin/sh -ex
-
+#TODO reorganize whole file
 DATA="$HOME/.local/share/spasm/" #TODO look into a way of improving this to fit more systems. XDG_DATA_HOME maybe?
 
 OPT_ADD=
@@ -17,6 +17,17 @@ usage(){
 
 explode(){
 	usage && exit 1
+}
+
+#TODO implement this
+make_backup()(
+	echo "creating backup..."
+	#cp $DATA spasm.bak
+)
+
+#TODO implement restoring from a .bak file
+restore_backup(){
+	echo "restoring from .bak file"
 }
 
 gen_pass() {

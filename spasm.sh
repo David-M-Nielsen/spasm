@@ -51,10 +51,10 @@ do
 	G) [[ -n "$pass" ]] && usage || pass=$(gen_pass $OPTARG) ;; #generates password
 	p) [[ -n "$pass" ]] && usage || pass=${OPTARG} ;; #takes password from user
 
-	# supposed to add a new password. 
-	# TODO needs to varify file structure "category/website" and needs either G or p to work.
+	# supposed to add a new encrypted password file 
+	# TODO needs either G or p to work, so find a way to ensure they are being run first, and at all
 	a) parse_path $OPTARG && schrodinger && [[ ! -z $pass ]] && make_pass ;;
-
+	g) echo "getting password from $OPTARG" ;;
 	# Error handling
 	\?) usage; exit 1 ;;
 

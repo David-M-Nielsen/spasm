@@ -1,6 +1,6 @@
 #/bin/sh -ex
 #TODO reorganize whole file
-DATA="$HOME/.local/share/spasm/" #TODO look into a way of improving this to fit more systems. XDG_DATA_HOME maybe?
+DATA="$HOME/.local/share/spasm" #TODO look into a way of improving this to fit more systems. XDG_DATA_HOME maybe?
 
 OPT_ADD=
 OPT_GET=
@@ -12,7 +12,7 @@ pass=""
 #TODO include all program options
 #TODO improve formatting and readability
 usage(){ 
-	echo "usage: spasm [-h] [-G length | -p password] [-a category/service] [-g category/service]"
+	echo "usage: spasm [ -h ] [ -G length | -p password ] [ -a [category]/[name] ] [ -g [category]/[name] ] [ -d [category/name] ]"
 }
 
 explode(){
@@ -35,47 +35,39 @@ gen_pass() {
 	< /dev/urandom tr -dc A-Za-z0-9 | head -c$1; echo # Temporary. 
 }
 
-# test if category exists and creates it if it does not. Checks if password exists and returns true if it does #TODO add password checking
-schrodinger(){
-	echo "entering schrodinger with: $DATA$cat"
-	mkdir -p "$DATA$cat/"
-	return 0 #TODO change to reflect whether or not password exists
-}
-
-#TODO impl. creating an encrypted file with the password innit
+#TODO implement file encryption
 add_pass(){	
 	[[ -z "$pass" ]] && echo "invalid argument -- -a requires password" && explode
-	schrodinger && echo "name \"$name\" already exists" && explode || echo "adding password: $pass to $cat/$name"
+	[ -f "$DATA/$cat/$name" ] && echo "password for \"$name\" already exists" && explode
+	
+	mkdir -p "$DATA/$cat" && echo "adding password: $pass to $cat/$name" && echo $pass > "$DATA/$cat/$name"
 }
 
-#TODO implement getting and decrypting password from file
+#TODO implement decrypting password file
 get_pass(){
-	schrodinger && echo "getting password from: $DATA$cat/$name"
+	[ -f "$DATA/$cat/$name" ] && cat "$DATA/$cat/$name"
 }
 
-# parses if the path was typed correctly: "category/website"
+# parses if the path was typed correctly: "category/service"
 parse_path(){
-	echo "entering parse_path with arg: $1"
 	#TODO check if theres a better/faster way to do this check.
 	cat=$(echo $1 | cut -d"/" -f1)
 	name=$(echo $1 | cut -d"/" -f2)
 
-	if [[ ! "$1" = "$cat/$name" ]]; then
-		echo "invalid argument -- path should be passed like: [category]/[service]"
-		explode
-	fi
+	[[ ! "$1" = "$cat/$name" ]] && echo "invalid argument -- path should be passed like: [category]/[name]" && explode
 }
 
-optstring="hG:p:a:g:"
+optstring="hG:p:a:g:d:"
 while getopts $optstring FLAG; #TODO add handling for no options passed
 do	
 	case $FLAG in	
 	h) usage; exit 0 ;; # prints help
-	G) [[ -n "$pass" ]] && explode || pass=$(gen_pass $OPTARG) ;; #generates password #TODO add proper error messages
-	p) [[ -n "$pass" ]] && explode || pass=${OPTARG} ;; #takes password from user #TODO add proper error messages
+	G) [[ -n "$pass" ]] && explode || pass=$(gen_pass $OPTARG) ;;#TODO add proper error messages
+	p) [[ -n "$pass" ]] && explode || pass=${OPTARG} ;;#TODO add proper error messages
 
-	a) parse_path $OPTARG && OPT_ADD=true ;; #sets option for adding new password to true
-	g) parse_path $OPTARG && OPT_GET=true ;; #sets option for getting password to true
+	a) parse_path $OPTARG && OPT_ADD=true ;;
+	g) parse_path $OPTARG && OPT_GET=true ;; 
+	d) parse_path $OPTARG && rm -r "$DATA/$OPTARG" && [ ! "$(ls -A "$DATA/$cat")" ] && rmdir "$DATA/$cat" ;;
 	# Error handling
 	\?) usage; exit 1 ;;
 
@@ -84,10 +76,4 @@ done
 
 [ $OPT_ADD ] && add_pass
 
-if [ $OPT_GET ]; then
-	get_pass
-fi
-
-#TODO remove cleanup stuff
-
-rmdir $DATA$cat
+[ $OPT_GET ] && get_pass

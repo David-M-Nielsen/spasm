@@ -37,14 +37,14 @@ gen_pass() {
 
 #TODO implement file encryption
 add_pass(){
-	[[ -z "$pass" ]] && echo "invalid argument -- -a requires password" && explode
+	[ -z "$pass" ] && echo "invalid argument -- -a requires password" && explode
 	[ -f "$DATA/$cat/$name" ] && echo "password for \"$name\" already exists" && explode
 	mkdir -p "$DATA/$cat" && echo "adding password: $pass to $cat/$name" && echo $pass > "$DATA/$cat/$name"
 }
 
 #TODO implement decrypting password file
 get_pass(){
-	[ -f "$DATA/$cat/$name" ] && cat "$DATA/$cat/$name" || echo "invalid argument -- no such category or password" && explode
+	[ ! -f "$DATA/$cat/$name" ] && echo "invalid argument -- no such category or password" && explode || cat "$DATA/$cat/$name" 
 }
 
 # parses if the path was typed correctly: "category/service"
@@ -54,17 +54,15 @@ parse_path(){
 	cat=$(echo $1 | cut -d"/" -f1)
 	name=$(echo $1 | cut -d"/" -f2)
 	
-	if [[ ! $control = "$cat/$name" ]]; then
+	if [ ! $control = "$cat/$name" ]; then 
 		echo "invalid argument -- path should be passed like: [category]/[name]"
-		explode
+		explode 
 	fi
 }
 
 delete_pass(){
 	[ ! -f "$DATA/$1" ] && echo "invalid argument -- no such category or password" && explode
-	
 	rm -rf "$DATA/$1"
-	
 	[ ! "$(ls -A "$DATA/$cat")" ] && rmdir "$DATA/$cat"
 }
 
@@ -72,16 +70,14 @@ optstring="hG:p:a:g:d:"
 while getopts $optstring FLAG; #TODO add handling for no options passed
 do	
 	case $FLAG in	
-	h) usage && exit 0 ;; # prints help
-	G) [[ -n "$pass" ]] && explode || pass=$(gen_pass $OPTARG) ;;#TODO add proper error messages
-	p) [[ -n "$pass" ]] && explode || pass=${OPTARG} ;;#TODO add proper error messages
-
+	h) usage && exit 0 ;;
+	G) [ -n "$pass" ] && explode || pass=$(gen_pass $OPTARG) ;;#TODO add proper error messages
+	p) [ -n "$pass" ] && explode || pass=${OPTARG} ;;#TODO add proper error messages
 	a) parse_path $OPTARG && OPT_ADD=true ;;
 	g) parse_path $OPTARG && OPT_GET=true ;; 
 	d) parse_path $OPTARG && delete_pass $OPTARG ;;
-	# Error handling
-	\?) usage; exit 1 ;;
 
+	\?) usage; exit 1 ;;
 	esac
 done
 

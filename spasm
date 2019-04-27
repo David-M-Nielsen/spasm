@@ -1,4 +1,5 @@
 #!/bin/sh -e
+
 #TODO reorganize whole file
 #TODO add function to print database structure
 DATA="$HOME/.local/share/spasm" #TODO look into a way of improving this to fit more systems. XDG_DATA_HOME maybe?

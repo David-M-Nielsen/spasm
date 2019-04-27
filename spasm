@@ -1,4 +1,4 @@
-#/bin/sh -ex
+#!/bin/sh -ex
 #TODO reorganize whole file
 #TODO add function to print database structure
 DATA="$HOME/.local/share/spasm" #TODO look into a way of improving this to fit more systems. XDG_DATA_HOME maybe?
@@ -17,11 +17,24 @@ usage(){
 	echo "usage: spasm [ -h ] [ -P] [ -G length | -p password ] [ -a [category]/[name] ] [ -g [category]/[name] ] [ -d [category/name] ]"
 }
 
+tree(){
+	local dir=""
+	local file=""
+	for pass_category in $DATA/* ; do
+		dir=$(echo $pass_category | rev | cut -d"/" -f1 | rev)
+		echo $dir
+		for pass_name in $pass_category/* ; do
+			file=$(echo $pass_name | rev | cut -d"/" -f1 | rev)
+			echo " $file"
+		done
+	done
+}
+
 explode(){
 	usage && exit 1
 }
 
-#TODO implement this
+#TODO implement creating backups
 make_backup()(
 	echo "creating backup..."
 	#cp $DATA spasm.bak
@@ -37,7 +50,6 @@ gen_pass() {
 	< /dev/urandom tr -dc A-Za-z0-9 | head -c$1; echo # Temporary. 
 }
 
-#TODO implement file encryption
 add_pass(){
 	[ -z "$pass" ] && echo "invalid argument -- -a requires password" && explode
 	[ -f "$DATA/$cat/$name" ] && echo "password for \"$name\" already exists" && explode
@@ -52,7 +64,6 @@ add_pass(){
 	fi
 }
 
-#TODO implement decrypting password file
 get_pass(){
 	[ ! -f "$DATA/$cat/$name" ] && echo "invalid argument -- no such category or password" && explode
 	
@@ -87,7 +98,7 @@ delete_pass(){
 	[ ! "$(ls -A "$DATA/$cat")" ] && rmdir "$DATA/$cat"
 }
 
-optstring="hG:p:a:g:d:P"
+optstring="hG:p:a:g:d:Pt"
 while getopts $optstring FLAG; #TODO add handling for no options passed
 do	
 	case $FLAG in	
@@ -98,7 +109,7 @@ do
 	g) parse_path $OPTARG && OPT_GET=true ;;
 	P) PRINT_PASS=true ;;
 	d) parse_path $OPTARG && delete_pass $OPTARG ;;
-
+	t) tree ;;
 	\?) usage; exit 1 ;;
 	esac
 done

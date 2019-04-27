@@ -41,17 +41,30 @@ gen_pass() {
 add_pass(){
 	[ -z "$pass" ] && echo "invalid argument -- -a requires password" && explode
 	[ -f "$DATA/$cat/$name" ] && echo "password for \"$name\" already exists" && explode
-	mkdir -p "$DATA/$cat" && echo "adding password: $pass to $cat/$name" && echo $pass > "$DATA/$cat/$name"
+	mkdir -p "$DATA/$cat" && echo "adding password: $pass to $cat/$name" 
+
+	
+	if [ -n $(type "gpg2" >/dev/null 2>&1) ]; then	
+		local phrase="$cat/$name"
+		echo $pass | gpg2 -q --batch --passphrase $phrase -c > "$DATA/$cat/$name"
+	else
+		echo $pass > "$DATA/$cat/$name"
+	fi
 }
 
 #TODO implement decrypting password file
 get_pass(){
 	[ ! -f "$DATA/$cat/$name" ] && echo "invalid argument -- no such category or password" && explode
 	
-	pass=$(echo $(<"$DATA/$cat/$name"))
+
+	if [ -n $(type "gpg2" >/dev/null 2>&1) ]; then
+		local phrase="$cat/$name"
+		pass=$(gpg2 -q --batch --passphrase $phrase -d "$DATA/$cat/$name") 
+	else
+		pass=$(echo $(<"$DATA/$cat/$name"))
+	fi
 
 	type "xclip" >/dev/null 2>&1 && echo $pass | xclip -selection c || PRINT_PASS=true
-
 	[ $PRINT_PASS ] && echo $pass
 }
 

@@ -15,7 +15,19 @@ pass=""
 #TODO include all program options
 #TODO improve formatting and readability
 usage(){ 
-	echo "usage: spasm [ -h ] [ -P] [ -G length | -p password ] [ -a [category]/[name] ] [ -g [category]/[name] ] [ -d [category/name] ]"
+cat << EOF
+usage: spasm [ -h ] [ -P ] [ -T ] [ -G length | -p password ] [ -a [category]/[name] ] [ -g [category]/[name] ] [ -d [category/name] ]
+
+options:
+	-h: prints this help
+	-P: print the input or retrieved password
+	-T: prints password database structure
+	-G: generate a password of the given length
+	-p: takes parameter as password
+	-a: adds a password to the given database path
+	-g: gets a password from the database path given
+	-d: deletes a password from the given database path
+EOF
 }
 
 tree(){
@@ -97,7 +109,7 @@ delete_pass(){
 	[ ! "$(ls -A "$DATA/$cat")" ] && rmdir "$DATA/$cat"
 }
 
-optstring="hG:p:a:g:d:Pt"
+optstring="hPTG:p:a:g:d:"
 while getopts $optstring FLAG; #TODO add handling for no options passed
 do	
 	case "$FLAG" in	
@@ -108,7 +120,7 @@ do
 	g) parse_path "$OPTARG" && OPT_GET=true ;;
 	P) PRINT_PASS=true ;;
 	d) parse_path "$OPTARG" && delete_pass "$OPTARG" ;;
-	t) tree ;;
+	T) tree ;;
 	\?) usage; exit 1 ;;
 	esac
 done

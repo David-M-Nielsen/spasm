@@ -18,13 +18,13 @@ usage(){
 }
 
 tree(){
-	local dir=""
-	local file=""
-	for pass_category in $DATA/* ; do
-		dir=$(echo $pass_category | rev | cut -d"/" -f1 | rev)
-		echo $dir
-		for pass_name in $pass_category/* ; do
-			file=$(echo $pass_name | rev | cut -d"/" -f1 | rev)
+	dir=""
+	file=""
+	for pass_category in "$DATA"/* ; do
+		dir=$(echo "$pass_category" | rev | cut -d"/" -f1 | rev)
+		echo "$dir"
+		for pass_name in "$pass_category"/* ; do
+			file=$(echo "$pass_name" | rev | cut -d"/" -f1 | rev)
 			echo " $file"
 		done
 	done
@@ -47,7 +47,7 @@ restore_backup(){
 
 gen_pass() {
 	#TODO Overhaul to include special characters and follow OWASP
-	< /dev/urandom tr -dc A-Za-z0-9 | head -c$1; echo # Temporary. 
+	< /dev/urandom tr -dc A-Za-z0-9 | head -c"$1"; echo # Temporary. 
 }
 
 add_pass(){
@@ -55,9 +55,8 @@ add_pass(){
 	[ -f "$DATA/$cat/$name" ] && echo "password for \"$name\" already exists" && explode
 	mkdir -p "$DATA/$cat" && echo "adding password: $pass to $cat/$name" 
 
-	
-	if [ -n $(type "gpg2" >/dev/null 2>&1) ]; then	
-		local phrase="$cat/$name"
+	if [ -n "$(type "gpg2")" ]; then	
+		phrase="$cat/$name"
 		echo $pass | gpg2 -q --batch --passphrase $phrase -c > "$DATA/$cat/$name"
 	else
 		echo $pass > "$DATA/$cat/$name"
@@ -66,27 +65,26 @@ add_pass(){
 
 get_pass(){
 	[ ! -f "$DATA/$cat/$name" ] && echo "invalid argument -- no such category or password" && explode
-	
 
-	if [ -n $(type "gpg2" >/dev/null 2>&1) ]; then
-		local phrase="$cat/$name"
+	if [ -n "$(type "gpg2")" ]; then
+		phrase="$cat/$name"
 		pass=$(gpg2 -q --batch --passphrase $phrase -d "$DATA/$cat/$name") 
 	else
-		pass=$(echo $(<"$DATA/$cat/$name"))
+		pass=$(cat "$DATA/$cat/$name")
 	fi
 
-	type "xclip" >/dev/null 2>&1 && echo $pass | xclip -selection c || PRINT_PASS=true
-	[ $PRINT_PASS ] && echo $pass
+	type "xclip" >/dev/null 2>&1 && echo "$pass" | xclip -selection c || PRINT_PASS=true
+	[ $PRINT_PASS ] && echo "$pass"
 }
 
 # parses if the path was typed correctly: "category/service"
 parse_path(){
 	#TODO check if theres a better/faster way to do this check.
-	local control="$1"
-	cat=$(echo $1 | cut -d"/" -f1)
-	name=$(echo $1 | cut -d"/" -f2)
+	control="$1"
+	cat=$(echo "$1" | cut -d"/" -f1)
+	name=$(echo "$1" | cut -d"/" -f2)
 	
-	if [ ! $control = "$cat/$name" ]; then 
+	if [ ! "$control" = "$cat/$name" ]; then 
 		echo "invalid argument -- path should be passed like: [category]/[name]"
 		explode 
 	fi
@@ -94,21 +92,21 @@ parse_path(){
 
 delete_pass(){
 	[ ! -f "$DATA/$1" ] && echo "invalid argument -- no such category or password" && explode
-	rm -rf "$DATA/$1"
+	rm -rf "$(var:"$DATA/$1")"
 	[ ! "$(ls -A "$DATA/$cat")" ] && rmdir "$DATA/$cat"
 }
 
 optstring="hG:p:a:g:d:Pt"
 while getopts $optstring FLAG; #TODO add handling for no options passed
 do	
-	case $FLAG in	
+	case "$FLAG" in	
 	h) usage && exit 0 ;;
-	G) [ -n "$pass" ] && explode || pass=$(gen_pass $OPTARG) ;;#TODO add proper error messages
+	G) [ -n "$pass" ] && explode || pass=$(gen_pass "$OPTARG") ;;#TODO add proper error messages
 	p) [ -n "$pass" ] && explode || pass=${OPTARG} ;;#TODO add proper error messages
-	a) parse_path $OPTARG && OPT_ADD=true ;;
-	g) parse_path $OPTARG && OPT_GET=true ;;
+	a) parse_path "$OPTARG" && OPT_ADD=true ;;
+	g) parse_path "$OPTARG" && OPT_GET=true ;;
 	P) PRINT_PASS=true ;;
-	d) parse_path $OPTARG && delete_pass $OPTARG ;;
+	d) parse_path "$OPTARG" && delete_pass "$OPTARG" ;;
 	t) tree ;;
 	\?) usage; exit 1 ;;
 	esac

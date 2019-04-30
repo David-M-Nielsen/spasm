@@ -40,6 +40,7 @@ usage(){
 cat << EOF
 usage: 
 	spasm [OPTIONS...]
+
 options:
 	-h: prints this help
 	-P: print the input or retrieved password

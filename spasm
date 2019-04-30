@@ -1,7 +1,6 @@
 #!/bin/sh
 
 #TODO reorganize whole file
-#TODO add function to print database structure
 DATA="$HOME/.local/share/spasm" #TODO look into a way of improving this to fit more systems. XDG_DATA_HOME maybe?
 
 OPT_ADD=
@@ -12,8 +11,6 @@ cat=""
 name=""
 pass=""
 
-#TODO include all program options
-#TODO improve formatting and readability
 usage(){ 
 cat << EOF
 usage: spasm [ -h ] [ -P ] [ -T ] [ -G length | -p password ] [ -a [category]/[name] ] [ -g [category]/[name] ] [ -d [category/name] ]
@@ -90,14 +87,14 @@ get_pass(){
 	[ $PRINT_PASS ] && echo "$pass"
 }
 
-# parses if the path was typed correctly: "category/service"
+# checks if the path was typed correctly: "category/service"
 parse_path(){
-	#TODO check if theres a better/faster way to do this check.
+	#TODO find out if theres a better/faster way to do this.
 	control="$1"
 	cat=$(echo "$1" | cut -d"/" -f1)
 	name=$(echo "$1" | cut -d"/" -f2)
 	
-	if [ ! "$control" = "$cat/$name" ]; then 
+	if [ "$control" != "$cat/$name" ]; then 
 		echo "invalid argument -- path should be passed like: [category]/[name]"
 		explode 
 	fi

@@ -1,4 +1,4 @@
-# Simple-Password-Manager ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+# spasm ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 Simple password manager, or `spasm` for short, is a password management program for linux.
 
 ### usage

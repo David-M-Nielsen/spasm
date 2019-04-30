@@ -4,8 +4,9 @@ Simple password manager, or `spasm` for short: a password management program for
 ### usage
 
 ```
-usage: spasm [ -h ] [ -P ] [ -T ] [ -G length | -p password ] [ -a [category]/[name] ] [ -g [category]/[name] ] [ -d [category/name] ]
-
+usage: 
+	spasm [OPTIONS...]
+	
 options:
 	-h: prints this help
 	-P: print the input or retrieved password

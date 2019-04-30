@@ -105,7 +105,7 @@ parse_path(){
 
 delete_pass(){
 	[ ! -f "$DATA/$1" ] && echo "invalid argument -- no such category or password" && explode
-	rm -rf "$(var:"$DATA/$1")"
+	rm "$DATA/$1"
 	[ ! "$(ls -A "$DATA/$cat")" ] && rmdir "$DATA/$cat"
 }
 

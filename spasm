@@ -31,6 +31,7 @@ DATA="$HOME/.local/share/spasm" #TODO look into a way of improving this to fit m
 OPT_ADD=
 OPT_GET=
 PRINT_PASS=
+HAD_OPTS=
 
 cat=""
 name=""
@@ -135,6 +136,7 @@ delete_pass(){
 optstring="hPTG:p:a:g:d:"
 while getopts $optstring FLAG; #TODO add handling for no options passed
 do	
+	HAD_OPTS=true
 	case "$FLAG" in	
 	h) usage && exit 0 ;;
 	G) [ -n "$pass" ] && explode || pass=$(gen_pass "$OPTARG") ;;#TODO add proper error messages
@@ -148,7 +150,11 @@ do
 	esac
 done
 
-[ $OPT_ADD ] && add_pass
-[ $OPT_GET ] && get_pass
+if [ $HAD_OPTS ]; then
+	[ $OPT_ADD ] && add_pass
+	[ $OPT_GET ] && get_pass
+else
+	echo "Error: spasm requires argument" && explode
+fi
 
 exit 0

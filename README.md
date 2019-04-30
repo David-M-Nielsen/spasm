@@ -1,5 +1,5 @@
 ## Simple-Password-Manager
-Simple password manager, or `spasm` for short: a password management program for linux.
+Simple password manager, or `SPasM` for short: a password management program for linux.
 
 ### usage
 

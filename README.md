@@ -1,5 +1,5 @@
 # Simple-Password-Manager ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-Simple password manager, or `spasm` for short: a password management program for linux.
+Simple password manager, or `spasm` for short, is a password management program for linux.
 
 ### usage
 

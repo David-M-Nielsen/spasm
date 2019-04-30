@@ -91,9 +91,9 @@ add_pass(){
 	[ -f "$DATA/$cat/$name" ] && echo "password for \"$name\" already exists" && explode
 	mkdir -p "$DATA/$cat" && echo "adding password: $pass to $cat/$name" 
 
-	if [ -n "$(type "gpg2")" ]; then	
+	if [ -n "$(type "gpg")" ]; then	
 		phrase="$cat/$name"
-		echo $pass | gpg2 -q --batch --passphrase $phrase -c > "$DATA/$cat/$name"
+		echo $pass | gpg -q --batch --passphrase $phrase -c > "$DATA/$cat/$name"
 	else
 		echo $pass > "$DATA/$cat/$name"
 	fi
@@ -102,9 +102,9 @@ add_pass(){
 get_pass(){
 	[ ! -f "$DATA/$cat/$name" ] && echo "invalid argument -- no such category or password" && explode
 
-	if [ -n "$(type "gpg2")" ]; then
+	if [ -n "$(type "gpg")" ]; then
 		phrase="$cat/$name"
-		pass=$(gpg2 -q --batch --passphrase $phrase -d "$DATA/$cat/$name") 
+		pass=$(gpg -q --batch --passphrase $phrase -d "$DATA/$cat/$name") 
 	else
 		pass=$(cat "$DATA/$cat/$name")
 	fi

@@ -178,7 +178,7 @@ if [ -n "$MASTER_HASH" ]; then
 else
 	read -s -p "no master passphrase found. please select one: " PASSPHRASE
 	echo ""
-	echo $(echo "$PASSPHRASE" | sha512sum | cut -d " " -f1) > "$DATA/.master" && echo "master passphrase added" && exit 0
+	mkdir -p $DATA && echo $(echo "$PASSPHRASE" | sha512sum | cut -d " " -f1) > "$DATA/.master" && echo "master passphrase added" && exit 0
 fi
 
 

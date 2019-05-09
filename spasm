@@ -73,17 +73,6 @@ explode(){
 	usage && exit 1
 }
 
-#TODO implement creating backups
-make_backup()(
-	echo "creating backup..."
-	#cp $DATA spasm.bak
-)
-
-#TODO implement restoring from a .bak file
-restore_backup(){
-	echo "restoring from .bak file"
-}
-
 gen_pass() {
 	#TODO Overhaul to include special characters and follow OWASP
 	< /dev/urandom tr -dc A-Za-z0-9 | head -c"$1"; echo # Temporary. 

@@ -149,15 +149,13 @@ run(){
 	fi
 }
 
-#TODO find a better way to do newline after read
 [ -f "$DATA/.master" ] && MASTER_HASH=$(cat "$DATA/.master")
 if [ -n "$MASTER_HASH" ]; then	
 	[ -f "$DATA/.pid" ] && PREV_PID=$(cat "$DATA/.pid")
 	if [ -n "$PREV_PID" ] && [ "$PREV_PID" = "$PID" ]; then
 		run "$@"
 	else
-		read -s -p "enter master passphrase: " PASSPHRASE
-		echo "" 
+		read -s -p "enter master passphrase:"$'\n' PASSPHRASE
 		if [ "$MASTER_HASH" == $(echo "$PASSPHRASE" | sha512sum | cut -d " " -f1) ]; then
 			run "$@"
 		else
@@ -165,8 +163,7 @@ if [ -n "$MASTER_HASH" ]; then
 		fi
 	fi
 else
-	read -s -p "no master passphrase found. please select one: " PASSPHRASE
-	echo ""
+	read -s -p "no master passphrase found. please select one:"$'\n' PASSPHRASE
 	mkdir -p $DATA && echo $(echo "$PASSPHRASE" | sha512sum | cut -d " " -f1) > "$DATA/.master" && echo "master passphrase added" && exit 0
 fi
 

@@ -60,10 +60,10 @@ tree(){
 	dir=""
 	file=""
 	for pass_category in "$DATA"/* ; do
-		dir=$(echo "$pass_category" | rev | cut -d"/" -f1 | rev)
+		dir=$(echo "${pass_category##*/}")
 		echo "$dir"
 		for pass_name in "$pass_category"/* ; do
-			file=$(echo "$pass_name" | rev | cut -d"/" -f1 | rev)
+			file=$(echo "${pass_name##*/}")
 			echo " $file"
 		done
 	done
